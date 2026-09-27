@@ -1,0 +1,75 @@
+<Window x:Class="WoWAddonSync.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WoWAddonSync"
+        Height="640" Width="1000" MinHeight="420" MinWidth="680">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="80" />
+            <RowDefinition Height="Auto" />
+            <!-- Starts as a fixed-height strip, same 120px as before, but
+                 the GridSplitter below lets you drag it as tall as you
+                 want (up to the addon list's MinHeight above) to see the
+                 whole log instead of just the last few lines. -->
+            <RowDefinition x:Name="LogRow" Height="120" MinHeight="24" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button x:Name="RefreshButton" Content="Check Status" Padding="10,4" Margin="0,0,8,0" Click="RefreshButton_Click" />
+            <Button x:Name="SyncButton" Content="Sync Now" Padding="10,4" Margin="0,0,8,0" Click="SyncButton_Click" />
+            <Button x:Name="SettingsButton" Content="Settings…" Padding="10,4" Click="SettingsButton_Click" />
+            <TextBlock x:Name="StatusText" VerticalAlignment="Center" Margin="16,0,0,0" Foreground="Gray" />
+        </StackPanel>
+
+        <!-- Addon list — the sidebar-equivalent, as a flat list rather
+             than the Mac app's NavigationSplitView sidebar+detail, since
+             a single list keeps this first WPF pass simple. A detail
+             pane (per-addon version-source overrides, matching
+             ContentView.swift's "Version Source" section) is a natural
+             next step once this compiles and the basic bindings are
+             confirmed working. -->
+        <ListView x:Name="AddonList" Grid.Row="1" SelectionMode="Single">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Addon" Width="200" DisplayMemberBinding="{Binding DisplayName}" />
+                    <GridViewColumn Header="Installed" Width="130" DisplayMemberBinding="{Binding InstalledVersionDisplay}" />
+                    <GridViewColumn Header="Latest Known" Width="170" DisplayMemberBinding="{Binding BestVersionDisplay}" />
+                    <GridViewColumn Header="Version Status" Width="110" DisplayMemberBinding="{Binding VersionStatus}" />
+                    <GridViewColumn Header="Sync Status" Width="110" DisplayMemberBinding="{Binding SyncStatus}" />
+                    <GridViewColumn Header="Last Error" Width="160" DisplayMemberBinding="{Binding LastError}" />
+                    <!--
+                        "Remove from this machine" — the Windows counterpart
+                        to ContentView.swift's Remove Addon button. Deletes
+                        this machine's local copy only (to the Recycle Bin,
+                        recoverable), matching SyncEngine.DeleteLocalFolders:
+                        the sync folder and every other machine are
+                        untouched. A confirmation dialog and the "nothing
+                        installed here to remove" guard for a cloud-only
+                        row both live in the Click handler rather than
+                        XAML, to keep this simple without a value converter.
+                    -->
+                    <GridViewColumn Header="">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Delete" Padding="8,2" Click="DeleteButton_Click" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+        <!-- Drag up/down to resize the log strip below. -->
+        <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" Height="5" Cursor="SizeNS"
+                      Background="LightGray" Margin="0,4,0,0" />
+
+        <!-- Log — starts as a short strip, but the GridSplitter above lets
+             it be dragged out to show the whole thing. -->
+        <Border Grid.Row="3" BorderBrush="LightGray" BorderThickness="0,1,0,0" Padding="0,6,0,0">
+            <ListBox x:Name="LogList" FontFamily="Consolas" FontSize="11" BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto" />
+        </Border>
+    </Grid>
+</Window>
