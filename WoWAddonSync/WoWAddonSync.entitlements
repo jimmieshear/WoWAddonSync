@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	App Sandbox is on. The WoW installation (under /Applications) and the
+	sync folder (normally inside iCloud Drive) are both outside the
+	sandbox container, so the app asks the user to pick each one once via
+	NSOpenPanel and keeps a security-scoped bookmark to it afterward — see
+	FolderAccess.swift / CloudFolderAccess. These two entitlements are what
+	let those grants keep working across launches.
+
+	Deliberately NOT using the iCloud capability
+	(com.apple.developer.icloud-container-identifiers /
+	com.apple.developer.icloud-services): that requires a paid Apple
+	Developer Program membership, and a free "Personal Team" can build an
+	app that claims it but the OS refuses to launch the result (a
+	RunningBoard/code-signing failure at launch, not a build error). The
+	sync folder the user picks can simply live inside their regular iCloud
+	Drive instead — no special entitlement needed for that, it works the
+	same as dragging any other file into iCloud Drive in Finder.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
+
+	<!-- Outbound network access for the WowInterface API. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>
